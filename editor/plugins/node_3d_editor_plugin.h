@@ -82,6 +82,7 @@ class ViewportRotationControl : public Control {
 	Vector<Color> axis_colors;
 	Vector<int> axis_menu_options;
 	Vector2i orbiting_mouse_start;
+	Point2 original_mouse_pos;
 	int orbiting_index = -1;
 	int focused_axis = -2;
 	bool gizmo_activated = false;
@@ -181,14 +182,12 @@ class Node3DEditorViewport : public Control {
 	};
 
 public:
-	enum {
-		GIZMO_BASE_LAYER = 27,
-		GIZMO_EDIT_LAYER = 26,
-		GIZMO_GRID_LAYER = 25,
-		MISC_TOOL_LAYER = 24,
+	static constexpr int32_t GIZMO_BASE_LAYER = 27;
+	static constexpr int32_t GIZMO_EDIT_LAYER = 26;
+	static constexpr int32_t GIZMO_GRID_LAYER = 25;
+	static constexpr int32_t MISC_TOOL_LAYER = 24;
 
-		FRAME_TIME_HISTORY = 20,
-	};
+	static constexpr int32_t FRAME_TIME_HISTORY = 20;
 
 	enum NavigationScheme {
 		NAVIGATION_GODOT = 0,
@@ -245,6 +244,7 @@ private:
 
 	EditorSelection *editor_selection = nullptr;
 
+	Button *translation_preview_button = nullptr;
 	CheckBox *preview_camera = nullptr;
 	SubViewportContainer *subviewport_container = nullptr;
 
@@ -847,6 +847,13 @@ private:
 
 	// Preview Sun and Environment
 
+	class PreviewSunEnvPopup : public PopupPanel {
+		GDCLASS(PreviewSunEnvPopup, PopupPanel);
+
+	protected:
+		virtual void shortcut_input(const Ref<InputEvent> &p_event) override;
+	};
+
 	uint32_t world_env_count = 0;
 	uint32_t directional_light_count = 0;
 
@@ -860,12 +867,8 @@ private:
 	EditorSpinSlider *sun_angle_azimuth = nullptr;
 	ColorPickerButton *sun_color = nullptr;
 	EditorSpinSlider *sun_energy = nullptr;
-	EditorSpinSlider *sun_max_distance = nullptr;
+	EditorSpinSlider *sun_shadow_max_distance = nullptr;
 	Button *sun_add_to_scene = nullptr;
-
-	void _sun_direction_draw();
-	void _sun_direction_input(const Ref<InputEvent> &p_event);
-	void _sun_direction_angle_set();
 
 	Vector2 sun_rotation;
 
@@ -896,6 +899,22 @@ private:
 	Ref<ProceduralSkyMaterial> sky_material;
 
 	bool sun_environ_updating = false;
+
+	void _sun_direction_draw();
+	void _sun_direction_input(const Ref<InputEvent> &p_event);
+	void _sun_direction_set_altitude(float p_altitude);
+	void _sun_direction_set_azimuth(float p_azimuth);
+	void _sun_set_color(const Color &p_color);
+	void _sun_set_energy(float p_energy);
+	void _sun_set_shadow_max_distance(float p_shadow_max_distance);
+
+	void _environ_set_sky_color(const Color &p_color);
+	void _environ_set_ground_color(const Color &p_color);
+	void _environ_set_sky_energy(float p_energy);
+	void _environ_set_ao();
+	void _environ_set_glow();
+	void _environ_set_tonemap();
+	void _environ_set_gi();
 
 	void _load_default_preview_settings();
 	void _update_preview_environment();
@@ -1029,7 +1048,7 @@ class Node3DEditorPlugin : public EditorPlugin {
 
 public:
 	Node3DEditor *get_spatial_editor() { return spatial_editor; }
-	virtual String get_plugin_name() const override { return "3D"; }
+	virtual String get_plugin_name() const override { return TTRC("3D"); }
 	bool has_main_screen() const override { return true; }
 	virtual void make_visible(bool p_visible) override;
 	virtual void edit(Object *p_object) override;
@@ -1042,7 +1061,6 @@ public:
 	virtual void edited_scene_changed() override;
 
 	Node3DEditorPlugin();
-	~Node3DEditorPlugin();
 };
 
 class ViewportNavigationControl : public Control {

@@ -30,8 +30,6 @@
 
 #pragma once
 
-#ifdef TOOLS_ENABLED
-
 #include "editor/editor_file_system.h"
 #include "editor/import/3d/resource_importer_scene.h"
 
@@ -59,7 +57,8 @@ public:
 	};
 	enum {
 		BLEND_MATERIAL_EXPORT_PLACEHOLDER,
-		BLEND_MATERIAL_EXPORT_EXPORT
+		BLEND_MATERIAL_EXPORT_EXPORT,
+		BLEND_MATERIAL_EXPORT_NAMED_PLACEHOLDER,
 	};
 	enum {
 		BLEND_MODIFIERS_NONE,
@@ -74,6 +73,7 @@ public:
 			List<ResourceImporter::ImportOption> *r_options) override;
 	virtual Variant get_option_visibility(const String &p_path, const String &p_scene_import_type, const String &p_option,
 			const HashMap<StringName, Variant> &p_options) override;
+	virtual void handle_compatibility_options(HashMap<StringName, Variant> &p_import_params) const override;
 };
 
 class LineEdit;
@@ -107,8 +107,4 @@ public:
 	virtual bool is_active() const override;
 	virtual Vector<String> get_file_extensions() const override;
 	virtual bool query() override;
-
-	EditorFileSystemImportFormatSupportQueryBlend();
 };
-
-#endif // TOOLS_ENABLED

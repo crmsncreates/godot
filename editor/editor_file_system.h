@@ -279,6 +279,7 @@ class EditorFileSystem : public Node {
 
 	bool _test_for_reimport(const String &p_path, const String &p_expected_import_md5);
 	bool _is_test_for_reimport_needed(const String &p_path, uint64_t p_last_modification_time, uint64_t p_modification_time, uint64_t p_last_import_modification_time, uint64_t p_import_modification_time, const Vector<String> &p_import_dest_paths);
+	bool _can_import_file(const String &p_path);
 	Vector<String> _get_import_dest_paths(const String &p_path);
 
 	bool reimport_on_missing_imported_files;
@@ -343,16 +344,11 @@ class EditorFileSystem : public Node {
 	HashSet<String> group_file_cache;
 	HashMap<String, String> file_icon_cache;
 
-	struct CopiedFile {
-		String from;
-		String to;
-	};
-
 	bool refresh_queued = false;
 	HashSet<ObjectID> folders_to_sort;
 
 	Error _copy_file(const String &p_from, const String &p_to);
-	bool _copy_directory(const String &p_from, const String &p_to, List<CopiedFile> *p_files);
+	bool _copy_directory(const String &p_from, const String &p_to, HashMap<String, String> *p_files);
 	void _queue_refresh_filesystem();
 	void _refresh_filesystem();
 
